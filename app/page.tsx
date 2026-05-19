@@ -8,6 +8,14 @@ import TemplateUpload from '@/components/TemplateUpload'
 import { Message, PresentationData, TemplateTheme } from '@/types'
 import { extractPresentationJSON } from '@/lib/utils'
 
+function isDark(hex: string): boolean {
+  const h = hex.replace('#', '')
+  const r = parseInt(h.slice(0, 2), 16) / 255
+  const g = parseInt(h.slice(2, 4), 16) / 255
+  const b = parseInt(h.slice(4, 6), 16) / 255
+  return 0.299 * r + 0.587 * g + 0.114 * b < 0.4
+}
+
 type Stage = 'input' | 'chatting' | 'ready'
 
 export default function Home() {
@@ -218,12 +226,17 @@ export default function Home() {
                 hasTemplate={templateTheme !== null}
               />
               {templateTheme && (
-                <div className="mt-2 flex gap-2 items-center">
-                  <span className="text-xs text-purple-600">已提取配色：</span>
-                  {[templateTheme.bgColor, templateTheme.titleColor, templateTheme.accentColor, templateTheme.bodyColor].map((c, i) => (
-                    <span key={i} className="w-4 h-4 rounded-full border border-gray-200 inline-block" style={{ backgroundColor: `#${c}` }} />
-                  ))}
-                  <span className="text-xs text-gray-400">{templateTheme.fontName}</span>
+                <div className="mt-2 space-y-1">
+                  <div className="flex gap-2 items-center">
+                    <span className="text-xs text-purple-600">已提取配色：</span>
+                    {[templateTheme.bgColor, templateTheme.titleColor, templateTheme.accentColor, templateTheme.bodyColor].map((c, i) => (
+                      <span key={i} className="w-4 h-4 rounded-full border border-gray-200 inline-block" style={{ backgroundColor: `#${c}` }} />
+                    ))}
+                    <span className="text-xs text-gray-400">{templateTheme.fontName}</span>
+                  </div>
+                  {isDark(templateTheme.bgColor) && (
+                    <p className="text-xs text-amber-500">⚠ 深色背景模板将自动转为浅色背景以确保文字可读（WPS 兼容性限制）</p>
+                  )}
                 </div>
               )}
             </div>
