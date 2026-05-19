@@ -5,7 +5,7 @@ import FileUpload from '@/components/FileUpload'
 import ChatPanel from '@/components/ChatPanel'
 import OcrWorker from '@/components/OcrWorker'
 import { Message, PresentationData } from '@/types'
-import { extractPresentationJSON } from '@/lib/deepseek'
+import { extractPresentationJSON } from '@/lib/utils'
 
 type Stage = 'input' | 'chatting' | 'ready'
 
