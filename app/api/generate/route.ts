@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     if (format === 'pptx') {
       const buffer = await generatePptx(presentation)
       const filename = `${presentation.title.replace(/[^\w一-龥]/g, '_')}.pptx`
-      return new Response(buffer as BodyInit, {
+      return new Response(buffer.buffer as ArrayBuffer, {
         headers: {
           'Content-Type': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
           'Content-Disposition': `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`,

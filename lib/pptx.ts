@@ -10,7 +10,6 @@ const THEMES = {
     bulletFontSize: 18,
     accentColor: '0f3460',
     footerColor: '888888',
-    fontFace: undefined as string | undefined,
   },
   business: {
     background: { color: '1a1a2e' },
@@ -20,7 +19,6 @@ const THEMES = {
     bulletFontSize: 18,
     accentColor: 'e94560',
     footerColor: '666666',
-    fontFace: undefined as string | undefined,
   },
   colorful: {
     background: { color: 'f8f9fa' },
@@ -30,26 +28,37 @@ const THEMES = {
     bulletFontSize: 18,
     accentColor: 'e74c3c',
     footerColor: '999999',
-    fontFace: undefined as string | undefined,
   },
 }
 
-export async function generatePptx(data: PresentationData): Promise<Buffer> {
+type ThemeConfig = {
+  background: { color: string }
+  titleColor: string
+  titleFontSize: number
+  bulletColor: string
+  bulletFontSize: number
+  accentColor: string
+  footerColor: string
+  fontFace?: string
+}
+
+export async function generatePptx(data: PresentationData): Promise<Uint8Array> {
   const prs = new pptxgen()
 
-  // 如果有模板主题，用模板配色覆盖默认主题
   const base = THEMES[data.theme] ?? THEMES.academic
   const t = data.templateTheme
-  const theme = t ? {
-    background: { color: t.bgColor },
-    titleColor: t.titleColor,
-    titleFontSize: 32,
-    bulletColor: t.bodyColor,
-    bulletFontSize: 18,
-    accentColor: t.accentColor,
-    footerColor: 'aaaaaa',
-    fontFace: t.fontName !== '微软雅黑' ? t.fontName : undefined,
-  } : base
+  const theme: ThemeConfig = t
+    ? {
+        background: { color: t.bgColor },
+        titleColor: t.titleColor,
+        titleFontSize: 32,
+        bulletColor: t.bodyColor,
+        bulletFontSize: 18,
+        accentColor: t.accentColor,
+        footerColor: 'aaaaaa',
+        fontFace: t.fontName,
+      }
+    : base
 
   prs.layout = 'LAYOUT_WIDE'
 
@@ -66,7 +75,7 @@ export async function generatePptx(data: PresentationData): Promise<Buffer> {
     color: theme.titleColor,
     align: 'center',
     valign: 'middle',
-    fontFace: theme.fontFace,
+    ...(theme.fontFace ? { fontFace: theme.fontFace } : {}),
   })
 
   // 内容页
@@ -74,7 +83,6 @@ export async function generatePptx(data: PresentationData): Promise<Buffer> {
     const s = prs.addSlide()
     s.background = theme.background
 
-    // 顶部色条
     s.addShape(prs.ShapeType.rect, {
       x: 0,
       y: 0,
@@ -84,7 +92,6 @@ export async function generatePptx(data: PresentationData): Promise<Buffer> {
       line: { type: 'none' },
     })
 
-    // 标题
     s.addText(slide.title, {
       x: '5%',
       y: '8%',
@@ -94,14 +101,19 @@ export async function generatePptx(data: PresentationData): Promise<Buffer> {
       bold: true,
       color: theme.titleColor,
       valign: 'middle',
-      fontFace: theme.fontFace,
+      ...(theme.fontFace ? { fontFace: theme.fontFace } : {}),
     })
 
-    // 要点
     if (slide.bullets && slide.bullets.length > 0) {
       const bulletItems = slide.bullets.map((b) => ({
         text: b,
-        options: { bullet: { type: 'bullet' as const }, fontSize: theme.bulletFontSize, color: theme.bulletColor, paraSpaceAfter: 8 },
+        options: {
+          bullet: { type: 'bullet' as const },
+          fontSize: theme.bulletFontSize,
+          color: theme.bulletColor,
+          paraSpaceAfter: 8,
+          ...(theme.fontFace ? { fontFace: theme.fontFace } : {}),
+        },
       }))
       s.addText(bulletItems, {
         x: '5%',
@@ -112,7 +124,6 @@ export async function generatePptx(data: PresentationData): Promise<Buffer> {
       })
     }
 
-    // 底部页脚
     s.addText(data.title, {
       x: '5%',
       y: '93%',
@@ -124,5 +135,6 @@ export async function generatePptx(data: PresentationData): Promise<Buffer> {
     })
   }
 
-  return prs.write({ outputType: 'nodebuffer' }) as unknown as Promise<Buffer>
+  const result = await (prs.write({ outputType: 'arraybuffer' }) as Promise<ArrayBuffer>)
+  return new Uint8Array(result)
 }
