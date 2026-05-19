@@ -235,7 +235,7 @@ export default function Home() {
                     <span className="text-xs text-gray-400">{templateTheme.fontName}</span>
                   </div>
                   {isDark(templateTheme.bgColor) && (
-                    <p className="text-xs text-amber-500">⚠ 深色背景模板将自动转为浅色背景以确保文字可读（WPS 兼容性限制）</p>
+                    <p className="text-xs text-gray-400">深色背景模板，已自动修复文字可读性</p>
                   )}
                 </div>
               )}
