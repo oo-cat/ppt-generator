@@ -1,5 +1,7 @@
 import { NextRequest } from 'next/server'
 
+const DOCX_MIME = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData()
@@ -10,13 +12,17 @@ export async function POST(request: NextRequest) {
     }
 
     const fileType = file.type
+    const fileName = file.name.toLowerCase()
     const arrayBuffer = await file.arrayBuffer()
     const base64 = Buffer.from(arrayBuffer).toString('base64')
 
-    // 图片和PDF直接返回base64，由前端传给DeepSeek（DeepSeek不支持视觉）
-    // 所以这里对PDF用pdfjs提取文本，图片返回base64由前端用Tesseract OCR
     if (fileType === 'application/pdf') {
       const text = await extractPdfText(arrayBuffer)
+      return Response.json({ type: 'text', content: text })
+    }
+
+    if (fileType === DOCX_MIME || fileName.endsWith('.docx')) {
+      const text = await extractDocxText(arrayBuffer)
       return Response.json({ type: 'text', content: text })
     }
 
@@ -24,12 +30,12 @@ export async function POST(request: NextRequest) {
       return Response.json({ type: 'image', base64, mimeType: fileType })
     }
 
-    if (fileType === 'text/plain' || fileType === 'text/markdown') {
+    if (fileType === 'text/plain' || fileType === 'text/markdown' || fileName.endsWith('.md')) {
       const text = new TextDecoder().decode(arrayBuffer)
       return Response.json({ type: 'text', content: text })
     }
 
-    return Response.json({ error: '不支持的文件类型' }, { status: 400 })
+    return Response.json({ error: '不支持的文件类型，支持：PDF、Word(.docx)、图片、TXT、MD' }, { status: 400 })
   } catch (error) {
     console.error('Parse file error:', error)
     return Response.json({ error: '文件解析失败' }, { status: 500 })
@@ -59,4 +65,10 @@ async function extractPdfText(buffer: ArrayBuffer): Promise<string> {
   }
 
   return pages.join('\n\n')
+}
+
+async function extractDocxText(buffer: ArrayBuffer): Promise<string> {
+  const mammoth = await import('mammoth')
+  const result = await mammoth.extractRawText({ buffer: Buffer.from(buffer) })
+  return result.value
 }

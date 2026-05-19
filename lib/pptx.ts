@@ -10,6 +10,7 @@ const THEMES = {
     bulletFontSize: 18,
     accentColor: '0f3460',
     footerColor: '888888',
+    fontFace: undefined as string | undefined,
   },
   business: {
     background: { color: '1a1a2e' },
@@ -19,6 +20,7 @@ const THEMES = {
     bulletFontSize: 18,
     accentColor: 'e94560',
     footerColor: '666666',
+    fontFace: undefined as string | undefined,
   },
   colorful: {
     background: { color: 'f8f9fa' },
@@ -28,12 +30,26 @@ const THEMES = {
     bulletFontSize: 18,
     accentColor: 'e74c3c',
     footerColor: '999999',
+    fontFace: undefined as string | undefined,
   },
 }
 
 export async function generatePptx(data: PresentationData): Promise<Buffer> {
   const prs = new pptxgen()
-  const theme = THEMES[data.theme] ?? THEMES.academic
+
+  // 如果有模板主题，用模板配色覆盖默认主题
+  const base = THEMES[data.theme] ?? THEMES.academic
+  const t = data.templateTheme
+  const theme = t ? {
+    background: { color: t.bgColor },
+    titleColor: t.titleColor,
+    titleFontSize: 32,
+    bulletColor: t.bodyColor,
+    bulletFontSize: 18,
+    accentColor: t.accentColor,
+    footerColor: 'aaaaaa',
+    fontFace: t.fontName !== '微软雅黑' ? t.fontName : undefined,
+  } : base
 
   prs.layout = 'LAYOUT_WIDE'
 
@@ -50,6 +66,7 @@ export async function generatePptx(data: PresentationData): Promise<Buffer> {
     color: theme.titleColor,
     align: 'center',
     valign: 'middle',
+    fontFace: theme.fontFace,
   })
 
   // 内容页
@@ -77,6 +94,7 @@ export async function generatePptx(data: PresentationData): Promise<Buffer> {
       bold: true,
       color: theme.titleColor,
       valign: 'middle',
+      fontFace: theme.fontFace,
     })
 
     // 要点

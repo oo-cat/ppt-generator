@@ -4,7 +4,8 @@ import { useState, useCallback } from 'react'
 import FileUpload from '@/components/FileUpload'
 import ChatPanel from '@/components/ChatPanel'
 import OcrWorker from '@/components/OcrWorker'
-import { Message, PresentationData } from '@/types'
+import TemplateUpload from '@/components/TemplateUpload'
+import { Message, PresentationData, TemplateTheme } from '@/types'
 import { extractPresentationJSON } from '@/lib/utils'
 
 type Stage = 'input' | 'chatting' | 'ready'
@@ -21,6 +22,7 @@ export default function Home() {
   const [scene, setScene] = useState('')
   const [ocrPending, setOcrPending] = useState<{ base64: string; mimeType: string } | null>(null)
   const [ocrStatus, setOcrStatus] = useState<'idle' | 'running' | 'done'>('idle')
+  const [templateTheme, setTemplateTheme] = useState<TemplateTheme | null>(null)
 
   const handleOcrImage = useCallback((_base64: string, mimeType: string, fileName: string) => {
     setOcrPending({ base64: _base64, mimeType })
@@ -82,7 +84,9 @@ export default function Home() {
 
       const pptData = extractPresentationJSON(reply)
       if (pptData) {
-        setPresentation(pptData as PresentationData)
+        const ppt = pptData as PresentationData
+        if (templateTheme) ppt.templateTheme = templateTheme
+        setPresentation(ppt)
         setStage('ready')
       }
     } catch (e) {
@@ -138,6 +142,7 @@ export default function Home() {
     setScene('')
     setOcrPending(null)
     setOcrStatus('idle')
+    setTemplateTheme(null)
   }
 
   return (
@@ -183,6 +188,24 @@ export default function Home() {
                 value={scene}
                 onChange={(e) => setScene(e.target.value)}
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">上传 PPT 模板（可选）</label>
+              <TemplateUpload
+                onTemplate={(theme) => setTemplateTheme(theme)}
+                onClear={() => setTemplateTheme(null)}
+                hasTemplate={templateTheme !== null}
+              />
+              {templateTheme && (
+                <div className="mt-2 flex gap-2 items-center">
+                  <span className="text-xs text-purple-600">已提取配色：</span>
+                  {[templateTheme.bgColor, templateTheme.titleColor, templateTheme.accentColor, templateTheme.bodyColor].map((c, i) => (
+                    <span key={i} className="w-4 h-4 rounded-full border border-gray-200 inline-block" style={{ backgroundColor: `#${c}` }} />
+                  ))}
+                  <span className="text-xs text-gray-400">{templateTheme.fontName}</span>
+                </div>
+              )}
             </div>
 
             <div>

@@ -9,10 +9,19 @@ export interface SlideContent {
   notes?: string
 }
 
+export interface TemplateTheme {
+  bgColor: string
+  titleColor: string
+  bodyColor: string
+  accentColor: string
+  fontName: string
+}
+
 export interface PresentationData {
   title: string
   theme: 'academic' | 'business' | 'colorful'
   slides: SlideContent[]
+  templateTheme?: TemplateTheme
 }
 
 export interface ChatRequest {

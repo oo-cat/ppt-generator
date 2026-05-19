@@ -56,7 +56,7 @@ export default function FileUpload({ onParsed, onOcrImage, disabled }: Props) {
         ref={inputRef}
         type="file"
         className="hidden"
-        accept=".pdf,.txt,.md,image/*"
+        accept=".pdf,.docx,.txt,.md,image/*"
         disabled={disabled}
         onChange={(e) => {
           const file = e.target.files?.[0]
@@ -71,7 +71,7 @@ export default function FileUpload({ onParsed, onOcrImage, disabled }: Props) {
       ) : (
         <>
           <p className="text-gray-500 text-sm">拖拽或点击上传</p>
-          <p className="text-gray-400 text-xs mt-1">支持 PDF、图片（思维导图截图）、TXT、MD</p>
+          <p className="text-gray-400 text-xs mt-1">支持 PDF、Word(.docx)、图片（思维导图截图）、TXT、MD</p>
         </>
       )}
     </div>
