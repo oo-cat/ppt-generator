@@ -20,6 +20,7 @@ export default function Home() {
 
   const [fileContent, setFileContent] = useState('')
   const [scene, setScene] = useState('')
+  const [duration, setDuration] = useState('')
   const [ocrPending, setOcrPending] = useState<{ base64: string; mimeType: string } | null>(null)
   const [ocrStatus, setOcrStatus] = useState<'idle' | 'running' | 'done'>('idle')
   const [templateTheme, setTemplateTheme] = useState<TemplateTheme | null>(null)
@@ -48,6 +49,7 @@ export default function Home() {
     const parts = [
       fileContent && `【素材内容】\n${fileContent}`,
       scene && `【使用场景】${scene}`,
+      duration && `【展示时长】${duration}分钟`,
     ].filter(Boolean)
 
     const userMsg: Message = { role: 'user', content: parts.join('\n\n') }
@@ -143,6 +145,7 @@ export default function Home() {
     setOcrPending(null)
     setOcrStatus('idle')
     setTemplateTheme(null)
+    setDuration('')
   }
 
   return (
@@ -177,17 +180,34 @@ export default function Home() {
               )}
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                使用场景 <span className="text-red-500">*</span>
-              </label>
-              <textarea
-                className="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 resize-none"
-                placeholder={'例：组会汇报，15分钟，5人研究小组\n例：课程期末汇报，20分钟，面向老师和同学'}
-                rows={3}
-                value={scene}
-                onChange={(e) => setScene(e.target.value)}
-              />
+            <div className="flex gap-3">
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  使用场景 <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  className="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 resize-none"
+                  placeholder={'例：组会汇报，5人研究小组\n例：课程期末汇报，面向老师和同学'}
+                  rows={3}
+                  value={scene}
+                  onChange={(e) => setScene(e.target.value)}
+                />
+              </div>
+              <div className="w-28 shrink-0">
+                <label className="block text-sm font-medium text-gray-700 mb-2">展示时长</label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    min={1}
+                    max={120}
+                    className="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 pr-8"
+                    placeholder="15"
+                    value={duration}
+                    onChange={(e) => setDuration(e.target.value)}
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">分钟</span>
+                </div>
+              </div>
             </div>
 
             <div>
