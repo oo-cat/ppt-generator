@@ -1,24 +1,16 @@
 import { PresentationData } from '@/types'
 
-const THEME_STYLES = {
-  academic: {
-    bg: '#ffffff',
-    text: '#1a1a2e',
-    accent: '#0f3460',
-    revealTheme: 'white',
-  },
-  business: {
-    bg: '#1a1a2e',
-    text: '#e2e2e2',
-    accent: '#e94560',
-    revealTheme: 'black',
-  },
-  colorful: {
-    bg: '#f8f9fa',
-    text: '#2c3e50',
-    accent: '#6c3483',
-    revealTheme: 'sky',
-  },
+import { ThemeId } from '@/types'
+
+const THEME_STYLES: Record<ThemeId, { bg: string; text: string; accent: string; revealTheme: string }> = {
+  academic: { bg: '#ffffff', text: '#1a1a2e', accent: '#0f3460', revealTheme: 'white' },
+  business: { bg: '#1a1a2e', text: '#e2e2e2', accent: '#e94560', revealTheme: 'black' },
+  colorful: { bg: '#f8f9fa', text: '#2c3e50', accent: '#6c3483', revealTheme: 'sky' },
+  'chinese-blue': { bg: '#ffffff', text: '#1B3F5E', accent: '#4A80A1', revealTheme: 'white' },
+  'chinese-ink': { bg: '#FAFAF8', text: '#1A1A1A', accent: '#4472C4', revealTheme: 'white' },
+  'chinese-elegant': { bg: '#ffffff', text: '#2C3A4A', accent: '#7E97BA', revealTheme: 'white' },
+  'minimal-white': { bg: '#ffffff', text: '#1A1A1A', accent: '#5B9BD5', revealTheme: 'white' },
+  'minimal-particles': { bg: '#0D1B2A', text: '#E8F4FD', accent: '#5B9BD5', revealTheme: 'black' },
 }
 
 export function generateRevealHtml(data: PresentationData): string {

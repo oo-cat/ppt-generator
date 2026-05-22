@@ -17,9 +17,19 @@ export interface TemplateTheme {
   fontName: string
 }
 
+export type ThemeId =
+  | 'academic'
+  | 'business'
+  | 'colorful'
+  | 'chinese-blue'
+  | 'chinese-ink'
+  | 'chinese-elegant'
+  | 'minimal-white'
+  | 'minimal-particles'
+
 export interface PresentationData {
   title: string
-  theme: 'academic' | 'business' | 'colorful'
+  theme: ThemeId
   slides: SlideContent[]
   templateTheme?: TemplateTheme
 }

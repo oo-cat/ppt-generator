@@ -5,7 +5,8 @@ import FileUpload from '@/components/FileUpload'
 import ChatPanel from '@/components/ChatPanel'
 import OcrWorker from '@/components/OcrWorker'
 import TemplateUpload from '@/components/TemplateUpload'
-import { Message, PresentationData, TemplateTheme } from '@/types'
+import ThemeSelector from '@/components/ThemeSelector'
+import { Message, PresentationData, TemplateTheme, ThemeId } from '@/types'
 import { extractPresentationJSON } from '@/lib/utils'
 
 function isDark(hex: string): boolean {
@@ -32,6 +33,7 @@ export default function Home() {
   const [ocrPending, setOcrPending] = useState<{ base64: string; mimeType: string } | null>(null)
   const [ocrStatus, setOcrStatus] = useState<'idle' | 'running' | 'done'>('idle')
   const [templateTheme, setTemplateTheme] = useState<TemplateTheme | null>(null)
+  const [selectedTheme, setSelectedTheme] = useState<ThemeId>('chinese-blue')
 
   const handleOcrImage = useCallback((_base64: string, mimeType: string, fileName: string) => {
     setOcrPending({ base64: _base64, mimeType })
@@ -54,10 +56,16 @@ export default function Home() {
 
   async function startAnalysis() {
     if (!fileContent && !scene) return
+    const themeNames: Record<ThemeId, string> = {
+      'chinese-blue': '中国风蓝', 'chinese-ink': '极简墨', 'chinese-elegant': '雅韵',
+      'minimal-white': '极简白', 'minimal-particles': '点线粒子深色',
+      'academic': '学术白', 'business': '商务深色', 'colorful': '活泼彩色',
+    }
     const parts = [
       fileContent && `【素材内容】\n${fileContent}`,
       scene && `【使用场景】${scene}`,
       duration && `【展示时长】${duration}分钟`,
+      `【风格偏好】${themeNames[selectedTheme]}（主题标识：${selectedTheme}）`,
     ].filter(Boolean)
 
     const userMsg: Message = { role: 'user', content: parts.join('\n\n') }
@@ -95,7 +103,12 @@ export default function Home() {
       const pptData = extractPresentationJSON(reply)
       if (pptData) {
         const ppt = pptData as PresentationData
-        if (templateTheme) ppt.templateTheme = templateTheme
+        if (templateTheme) {
+          ppt.templateTheme = templateTheme
+        } else {
+          // Ensure selected theme is preserved even if AI returns a different one
+          ppt.theme = selectedTheme
+        }
         setPresentation(ppt)
         setStage('ready')
       }
@@ -154,6 +167,7 @@ export default function Home() {
     setOcrStatus('idle')
     setTemplateTheme(null)
     setDuration('')
+    setSelectedTheme('chinese-blue')
   }
 
   return (
@@ -218,8 +232,10 @@ export default function Home() {
               </div>
             </div>
 
+            <ThemeSelector value={selectedTheme} onChange={setSelectedTheme} />
+
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">上传 PPT 模板（可选）</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">上传 PPT 模板（可选，会覆盖上方风格配色）</label>
               <TemplateUpload
                 onTemplate={(theme) => setTemplateTheme(theme)}
                 onClear={() => setTemplateTheme(null)}
